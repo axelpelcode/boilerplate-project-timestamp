@@ -18,8 +18,7 @@ app.use(express.static('public'));
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (req, res) {
   res
-  .sendFile(__dirname + '/public/index.html')
-  .type("text/html");
+  .sendFile(__dirname + '/views/index.html');
 });
 
 
@@ -33,7 +32,25 @@ app.get("/api", (req, res) => {
     unix: new Date().getTime(),
     utc: new Date().toUTCString()
   }).set('Content-Type','application/json');
-})
+});
+
+app.get("/api/:timestamp", (req, res)=>{
+  const timestamp = req.params.timestamp;
+  if(!isNaN(Number(timestamp)) && timestamp.length === 13){
+    return res.json({
+      unix: Number(timestamp),
+      utc: new Date(Number(timestamp)).toUTCString()
+    });
+  } 
+  if(new Date(timestamp).toUTCString() !== "Invalid Date"){
+    return res.json({
+      unix: new Date(timestamp).getTime(),
+      utc: new Date(timestamp).toUTCString()
+    });
+  } else { err => console.log(err)};
+
+  res.json({error: "Invalid Date"});
+});
 
 // listen for requests :)
 var listener = app.listen(3000, function () {
